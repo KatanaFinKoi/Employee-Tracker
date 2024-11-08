@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS 'employee-tracker_db';
+CREATE DATABASE IF NOT EXISTS employee-tracker_db;
 
 \c employee-tracker_db;
 

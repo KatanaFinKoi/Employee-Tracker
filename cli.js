@@ -41,11 +41,11 @@ const questions = [
 ]
 .then(answers => {
     if (answers === 'view all departments') {
-        // do something
+        viewDepartments();
     } else if (answers === 'view all roles') {
-        // do something
+        viewRoles();
     } else if (answers === 'view all employees') {
-        // do something
+        viewEmployees();
     } else if (answers === 'add a department') {
         const departmentQuestions = [
             {
@@ -108,11 +108,19 @@ const questions = [
                 type: 'list',
                 name: 'manager',
                 message: 'Who is the manager of the employee?',
-                choices: managerChoices // this should be an array of objects with id and name properties using the employees table from sql
+                choices: employeeChoices // this should be an array of objects with id and name properties using the employees table from sql
+                // need to create function to pull employees from sql
             }
         ]
     } else if (answers === 'update an employee') {
-        // do something
+        const updateEmployeeQuestions = [
+            {
+                type: 'list',
+                name: 'pickEmployee',
+                message: 'Which employee do you want to update?',
+                choices: employeeChoices
+            }
+        ]
     } else {
         console.log('Invalid input');
     }

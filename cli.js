@@ -47,11 +47,70 @@ const questions = [
     } else if (answers === 'view all employees') {
         // do something
     } else if (answers === 'add a department') {
-        // do something
+        const departmentQuestions = [
+            {
+                type: 'number',
+                name: 'id',
+                message: 'What is the id of the department?'
+            },
+            {
+                type: 'input',
+                name: 'name',
+                message: 'What is the name of the department?'
+            }
+        ]
     } else if (answers === 'add a role') {
-        // do something
+        const roleQuestions = [
+            {
+                type: 'number',
+                name: 'id',
+                message: 'What is the id of the role?'
+            },
+            {
+                type: 'input',
+                name: 'title',
+                message: 'What is the title of the role?'
+            },
+            {
+                type: 'number',
+                name: 'salary',
+                message: 'What is the salary of the role?'
+            },
+            {
+                type: 'number',
+                name: 'department',
+                message: 'which department does the role belong to?'
+            }
+        ]
     } else if (answers === 'add an employee') {
-        // do something
+        const employeeQuestions = [
+            {
+                type: 'number',
+                name: 'id',
+                message: 'What is the id of the employee?'
+            },
+            {
+                type: 'input',
+                name: 'first_name',
+                message: 'What is the first name of the employee?'
+            },
+            {
+                type: 'input',
+                name: 'last_name',
+                message: 'What is the last name of the employee?'
+            },
+            {
+                type: 'number',
+                name: 'role',
+                message: 'What is the role of the employee?'
+            },
+            {
+                type: 'list',
+                name: 'manager',
+                message: 'Who is the manager of the employee?',
+                choices: managerChoices // this should be an array of objects with id and name properties using the employees table from sql
+            }
+        ]
     } else if (answers === 'update an employee') {
         // do something
     } else {

@@ -1,16 +1,16 @@
-const department = {
+const departments = {
     id: id,
     name: name
 }
 
-const role = {
+const roles = {
     id: id,
     title: title,
     salary: salary,
     department_id: department_id
 }
 
-const employee = {
+const employees = {
     id: id,
     first_name: first_name,
     last_name: last_name,

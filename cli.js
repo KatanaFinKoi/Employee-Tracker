@@ -1,4 +1,34 @@
 import inquirer from 'inquirer';
+const inquirer = require('inquirer');
+const { Client } = require('pg');
+
+const client = new Client({
+    user: 'postgres',
+    host: 'localhost',
+    database: 'employee-tracker_db',
+    password: 'liam',
+    port: 5432
+});
+
+async function viewDepartments(){
+    await client.connect();
+    const res = await client.query('SELECT * FROM departments');
+    console.table(res.rows);
+    client.end();
+}
+async function viewRoles(){
+    await client.connect();
+    const res = await client.query('SELECT * FROM roles');
+    console.table(res.rows);
+    client.end();
+}
+async function viewEmployees(){
+    await client.connect();
+    const res = await client.query('SELECT * FROM employees');
+    console.table(res.rows);
+    client.end();
+}
+
 
 const questions = [
     {
@@ -25,6 +55,6 @@ const questions = [
     } else if (answers === 'update an employee') {
         // do something
     } else {
-        // do something
+        console.log('Invalid input');
     }
 });

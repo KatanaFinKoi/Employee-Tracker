@@ -81,18 +81,11 @@ async function addEmployee(answers) {
     }
 }
 
-async function getEmployeeChoices() {
-    try { await client.connect();
-    const res = await client.query('SELECT id, first_name, last_name FROM employees');
-    } catch (error) {
-        console.error('Error getting employee choices:', error);
-    } finally {
+async function getEmployeeById(employeeId) {
+    await client.connect();
+    const res = await client.query('SELECT * FROM employees WHERE id = $1', [employeeId]);
     client.end();
-    return res.rows.map(employee => ({
-        name: `${employee.first_name} ${employee.last_name}`,
-        value: employee.id
-    }));
-}
+    return res.rows[0];
 }
 
 
@@ -101,10 +94,18 @@ const questions = [
         type: 'list',
         name: 'options',
         message: 'What do you want to do?',
-        choices: ['view all departments', 'view all roles', 'view all employees',
-             'add a department', 'add a role', 'add an employee', 'update an employee']
+        choices: [
+            'view all departments', 
+            'view all roles', 
+            'view all employees',
+            'add a department', 
+            'add a role', 
+            'add an employee', 
+            'update an employee',
+            'exit'
+        ]
     },
-]
+];
 
 const doOption = async (answers) => {
 
@@ -166,7 +167,6 @@ const doOption = async (answers) => {
 
     } else if (answers === 'add an employee') {
 
-        const employeeChoices = await getEmployeeChoices();
         const employeeQuestions = [
             {
                 type: 'number',
@@ -188,92 +188,88 @@ const doOption = async (answers) => {
                 name: 'role',
                 message: 'What is the role of the employee?'
             },
-            // {
-            //     type: 'list',
-            //     name: 'manager',
-            //     message: 'Who is the manager of the employee?',
-            //     choices: employeeChoices,
-            //     default: null
-            // }
+            {
+                type: 'number',
+                name: 'manager',
+                message: 'Who is the manager of the employee?',
+                default: null
+            }
         ];
         const employeeAnswers = await inquirer.prompt(employeeQuestions);
         await addEmployee(employeeAnswers);
 
     } else if (answers === 'update an employee') {
-
-        const employeeChoices = await getEmployeeChoices();
         async function updateEmployee() {
             try {
-                await client.connect();
-                const employeeChoices = await getEmployeeChoices();
-                const { pickEmployee } = await inquirer.prompt([
+                const employeeId = await inquirer.prompt([
                     {
-                        type: 'list',
-                        name: 'pickEmployee',
-                        message: 'Which employee do you want to update?',
-                        choices: employeeChoices
+                        type: 'number',
+                        name: 'employeeId',
+                        message: 'Enter the ID of the employee you want to update:'
                     }
                 ]);
-                    const updateQuestions = [
+                const currentData = await getEmployeeById(employeeId);
+                
+                if (!currentData) {
+                    console.log("Employee with this ID does not exist.");
+                    return;
+                }
+                const updateQuestions = [
                     {
                         type: 'input',
                         name: 'first_name',
-                        message: 'Enter new first name (leave blank to keep current):'
+                        message: 'Enter new first name:',
+                        default: currentData.first_name
                     },
                     {
                         type: 'input',
                         name: 'last_name',
-                        message: 'Enter new last name (leave blank to keep current):'
+                        message: 'Enter new last name:',
+                        default: currentData.last_name
                     },
                     {
                         type: 'number',
                         name: 'role_id',
-                        message: 'Enter new role ID (leave blank to keep current):',
-                        default: null
+                        message: 'Enter new role ID:',
+                        default: currentData.role_id
                     },
                     {
-                        type: 'number',
+                        type: 'input',
                         name: 'manager_id',
-                        message: 'Enter new manager ID (leave blank to keep current):',
-                        default: null
+                        message: 'Enter new manager ID (leave blank for no manager):',
+                        default: currentData.manager_id ? currentData.manager_id : ''
                     }
-                    ];
-            const newInfo = await inquirer.prompt(updateQuestions);
-            let updateFields = [];
-            let updateValues = [];
-            let index = 1;
-
-            if (newInfo.first_name) {
-                updateFields.push(`first_name = $${index++}`);
-                updateValues.push(newInfo.first_name);
+                ];
+        
+                const newInfo = await inquirer.prompt(updateQuestions);
+        
+                const managerId = newInfo.manager_id ? parseInt(newInfo.manager_id) : null;
+        
+                await client.connect();
+                const query = `
+                    UPDATE employees 
+                    SET first_name = $1, last_name = $2, role_id = $3, manager_id = $4 
+                    WHERE id = $5
+                `;
+                await client.query(query, [
+                    newInfo.first_name,
+                    newInfo.last_name,
+                    newInfo.role_id,
+                    managerId,
+                    employeeId
+                ]);
+        
+                console.log('Employee information updated successfully.');
+            } catch (error) {
+                console.error('Error updating employee:', error);
+            }
         }
-            if (newInfo.last_name) {
-                updateFields.push(`last_name = $${index++}`);
-                updateValues.push(newInfo.last_name);
-        }
-            if (newInfo.role_id !== null) {
-                updateFields.push(`role_id = $${index++}`);
-                updateValues.push(newInfo.role_id);
-        }
-            if (newInfo.manager_id !== null) {
-                updateFields.push(`manager_id = $${index++}`);
-                updateValues.push(newInfo.manager_id);
-        }
-        if (updateFields.length > 0) {
-            const query = `UPDATE employees SET ${updateFields.join(', ')} WHERE id = $${index}`;
-            updateValues.push(pickEmployee);
-
-            await client.query(query, updateValues);
-            console.log('Employee information updated successfully.');
-        } else {
-            console.log('No updates provided.');
-        }
-        } catch (error) {
-        console.error('Error updating employee:', error);
-        } finally {
-        client.end();
-        }}}
-    else {
+        
+    } else if (answers === 'exit') {
+            
+        console.log('Goodbye!');
+    
+    } else {
 
         console.log('Invalid input');
     }

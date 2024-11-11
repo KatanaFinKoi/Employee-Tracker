@@ -1,11 +1,11 @@
 import inquirer from 'inquirer';
-const inquirer = require('inquirer');
-const { Client } = require('pg');
+// const inquirer = require('inquirer');
+import Client from 'pg';
 
-const client = new Client({
+const client = new Client.Client({
     user: 'postgres',
     host: 'localhost',
-    database: 'employee-tracker_db',
+    database: 'employee_tracker_db',
     password: 'liam',
     port: 5432
 });
@@ -30,6 +30,8 @@ async function viewEmployees(){
 }
 
 
+
+
 const questions = [
     {
         type: 'list',
@@ -39,7 +41,18 @@ const questions = [
              'add a department', 'add a role', 'add an employee', 'update an employee']
     },
 ]
-.then(answers => {
+
+async function getEmployeeChoices() {
+    await client.connect();
+    const res = await client.query('SELECT id, first_name, last_name FROM employees');
+    client.end();
+    return res.rows.map(employee => ({
+        name: `${employee.first_name} ${employee.last_name}`,
+        value: employee.id
+    }));
+}
+
+const doOption = async (answers) => {
     if (answers === 'view all departments') {
         viewDepartments();
     } else if (answers === 'view all roles') {
@@ -108,8 +121,7 @@ const questions = [
                 type: 'list',
                 name: 'manager',
                 message: 'Who is the manager of the employee?',
-                choices: employeeChoices // this should be an array of objects with id and name properties using the employees table from sql
-                // need to create function to pull employees from sql
+                choices: getEmployeeChoices
             }
         ]
     } else if (answers === 'update an employee') {
@@ -118,10 +130,16 @@ const questions = [
                 type: 'list',
                 name: 'pickEmployee',
                 message: 'Which employee do you want to update?',
-                choices: employeeChoices
+                choices: getEmployeeChoices
             }
         ]
     } else {
         console.log('Invalid input');
     }
+};
+
+inquirer
+.prompt(questions)
+.then((answers) => {
+    doOption(answers.options);
 });

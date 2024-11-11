@@ -81,12 +81,12 @@ async function addEmployee(answers) {
     }
 }
 
-async function getEmployeeById(employeeId) {
-    await client.connect();
-    const res = await client.query('SELECT * FROM employees WHERE id = $1', [employeeId]);
-    client.end();
-    return res.rows[0];
-}
+// async function getEmployeeById(employeeId) {
+//     await client.connect();
+//     const res = await client.query('SELECT * FROM employees WHERE id = $1', [employeeId]);
+//     client.end();
+//     return res.rows[0];
+// }
 
 
 const questions = [
@@ -198,74 +198,76 @@ const doOption = async (answers) => {
         const employeeAnswers = await inquirer.prompt(employeeQuestions);
         await addEmployee(employeeAnswers);
 
-    } else if (answers === 'update an employee') {
-        async function updateEmployee() {
-            try {
-                const employeeId = await inquirer.prompt([
-                    {
-                        type: 'number',
-                        name: 'employeeId',
-                        message: 'Enter the ID of the employee you want to update:'
-                    }
-                ]);
-                const currentData = await getEmployeeById(employeeId);
+    }
+    //  else if (answers === 'update an employee') {
+    //     async function updateEmployee() {
+    //         try {
+    //             const employeeId = await inquirer.prompt([
+    //                 {
+    //                     type: 'number',
+    //                     name: 'employeeId',
+    //                     message: 'Enter the ID of the employee you want to update:'
+    //                 }
+    //             ]);
+    //             const currentData = await getEmployeeById(employeeId);
                 
-                if (!currentData) {
-                    console.log("Employee with this ID does not exist.");
-                    return;
-                }
-                const updateQuestions = [
-                    {
-                        type: 'input',
-                        name: 'first_name',
-                        message: 'Enter new first name:',
-                        default: currentData.first_name
-                    },
-                    {
-                        type: 'input',
-                        name: 'last_name',
-                        message: 'Enter new last name:',
-                        default: currentData.last_name
-                    },
-                    {
-                        type: 'number',
-                        name: 'role_id',
-                        message: 'Enter new role ID:',
-                        default: currentData.role_id
-                    },
-                    {
-                        type: 'input',
-                        name: 'manager_id',
-                        message: 'Enter new manager ID (leave blank for no manager):',
-                        default: currentData.manager_id ? currentData.manager_id : ''
-                    }
-                ];
+    //             if (!currentData) {
+    //                 console.log("Employee with this ID does not exist.");
+    //                 return;
+    //             }
+    //             const updateQuestions = [
+    //                 {
+    //                     type: 'input',
+    //                     name: 'first_name',
+    //                     message: 'Enter new first name:',
+    //                     default: currentData.first_name
+    //                 },
+    //                 {
+    //                     type: 'input',
+    //                     name: 'last_name',
+    //                     message: 'Enter new last name:',
+    //                     default: currentData.last_name
+    //                 },
+    //                 {
+    //                     type: 'number',
+    //                     name: 'role_id',
+    //                     message: 'Enter new role ID:',
+    //                     default: currentData.role_id
+    //                 },
+    //                 {
+    //                     type: 'input',
+    //                     name: 'manager_id',
+    //                     message: 'Enter new manager ID (leave blank for no manager):',
+    //                     default: currentData.manager_id ? currentData.manager_id : ''
+    //                 }
+    //             ];
         
-                const newInfo = await inquirer.prompt(updateQuestions);
+    //             const newInfo = await inquirer.prompt(updateQuestions);
         
-                const managerId = newInfo.manager_id ? parseInt(newInfo.manager_id) : null;
+    //             const managerId = newInfo.manager_id ? parseInt(newInfo.manager_id) : null;
         
-                await client.connect();
-                const query = `
-                    UPDATE employees 
-                    SET first_name = $1, last_name = $2, role_id = $3, manager_id = $4 
-                    WHERE id = $5
-                `;
-                await client.query(query, [
-                    newInfo.first_name,
-                    newInfo.last_name,
-                    newInfo.role_id,
-                    managerId,
-                    employeeId
-                ]);
+    //             await client.connect();
+    //             const query = `
+    //                 UPDATE employees 
+    //                 SET first_name = $1, last_name = $2, role_id = $3, manager_id = $4 
+    //                 WHERE id = $5
+    //             `;
+    //             await client.query(query, [
+    //                 newInfo.first_name,
+    //                 newInfo.last_name,
+    //                 newInfo.role_id,
+    //                 managerId,
+    //                 employeeId
+    //             ]);
         
-                console.log('Employee information updated successfully.');
-            } catch (error) {
-                console.error('Error updating employee:', error);
-            }
-        }
-        
-    } else if (answers === 'exit') {
+    //             console.log('Employee information updated successfully.');
+    //         } catch (error) {
+    //             console.error('Error updating employee:', error);
+    //         }
+    //     }
+
+    // } 
+    else if (answers === 'exit') {
             
         console.log('Goodbye!');
     
